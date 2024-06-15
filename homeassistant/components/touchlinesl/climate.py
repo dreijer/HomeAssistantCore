@@ -13,6 +13,7 @@ from homeassistant.components.climate import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -83,13 +84,12 @@ class TouchlineSLDevice(CoordinatorEntity, ClimateEntity):
         self._battery_level = None
         self._signalStrength = None
         self._mode = None
+        self._current_operation_mode = HVACMode.HEAT
 
         """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator, context=self._zone_id)
 
         self._refresh_device_values(device_info)
-
-        self._current_operation_mode = HVACMode.HEAT
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -99,17 +99,14 @@ class TouchlineSLDevice(CoordinatorEntity, ClimateEntity):
             (z for z in updated_state if z["zone"]["id"] == self._zone_id), None
         )
         if device_info is None:
-            # Ignore the update.
-            return
+            # The zone is no longer available.
+            raise HomeAssistantError(
+                f"Device for zone {self._zone_id} is no longer available."
+            )
 
         self._refresh_device_values(device_info)
 
         self.async_write_ha_state()
-
-    # def async_update(self) -> None:
-    #    """Update thermostat attributes."""
-    #    module_zones = await self._api_connector.async_get_zones(self._module_udid)
-    #    self.update_device_values(deviceInfo)
 
     def _refresh_device_values(self, device_info) -> None:
         self._name = device_info["description"]["name"]
