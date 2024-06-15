@@ -1,0 +1,15 @@
+{
+  "domain": "touchlinesl",
+  "name": "Roth Touchline SL",
+  "codeowners": ["@dreijer"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/touchlinesl",
+  "homekit": {},
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "loggers": ["custom_components.touchlinesl"],
+  "requirements": ["aiohttp==3.9.5", "touchlinesl_connector==0.1"],
+  "ssdp": [],
+  "zeroconf": []
+}
